@@ -16,6 +16,7 @@ from zep_cloud import EpisodeData, EntityEdgeSourceTarget
 from ..config import Config
 from ..models.task import TaskManager, TaskStatus
 from ..utils.zep_paging import fetch_all_nodes, fetch_all_edges
+from ..utils.zep_retry import call_with_retry
 from .text_processor import TextProcessor
 
 
@@ -188,10 +189,13 @@ class GraphBuilderService:
         """创建Zep图谱（公开方法）"""
         graph_id = f"mirofish_{uuid.uuid4().hex[:16]}"
         
-        self.client.graph.create(
-            graph_id=graph_id,
-            name=name,
-            description="MiroFish Social Simulation Graph"
+        call_with_retry(
+            func=lambda: self.client.graph.create(
+                graph_id=graph_id,
+                name=name,
+                description="MiroFish Social Simulation Graph"
+            ),
+            operation_name="创建图谱"
         )
         
         return graph_id
@@ -266,7 +270,7 @@ class GraphBuilderService:
             
             # 构建source_targets
             source_targets = []
-            for st in edge_def.get("source_targets", []):
+            for st in edge_def.get("source_targets", [])[:10]:
                 source_targets.append(
                     EntityEdgeSourceTarget(
                         source=st.get("source", "Entity"),
@@ -279,10 +283,13 @@ class GraphBuilderService:
         
         # 调用Zep API设置本体
         if entity_types or edge_definitions:
-            self.client.graph.set_ontology(
-                graph_ids=[graph_id],
-                entities=entity_types if entity_types else None,
-                edges=edge_definitions if edge_definitions else None,
+            call_with_retry(
+                func=lambda: self.client.graph.set_ontology(
+                    graph_ids=[graph_id],
+                    entities=entity_types if entity_types else None,
+                    edges=edge_definitions if edge_definitions else None,
+                ),
+                operation_name="设置图谱本体"
             )
     
     def add_text_batches(
@@ -316,9 +323,12 @@ class GraphBuilderService:
             
             # 发送到Zep
             try:
-                batch_result = self.client.graph.add_batch(
-                    graph_id=graph_id,
-                    episodes=episodes
+                batch_result = call_with_retry(
+                    func=lambda: self.client.graph.add_batch(
+                        graph_id=graph_id,
+                        episodes=episodes
+                    ),
+                    operation_name=f"添加文本批次({batch_num}/{total_batches})"
                 )
                 
                 # 收集返回的 episode uuid
@@ -370,7 +380,10 @@ class GraphBuilderService:
             # 检查每个 episode 的处理状态
             for ep_uuid in list(pending_episodes):
                 try:
-                    episode = self.client.graph.episode.get(uuid_=ep_uuid)
+                    episode = call_with_retry(
+                        func=lambda eu=ep_uuid: self.client.graph.episode.get(uuid_=eu),
+                        operation_name=f"获取Episode({ep_uuid[:8]})状态"
+                    )
                     is_processed = getattr(episode, 'processed', False)
                     
                     if is_processed:
@@ -496,5 +509,8 @@ class GraphBuilderService:
     
     def delete_graph(self, graph_id: str):
         """删除图谱"""
-        self.client.graph.delete(graph_id=graph_id)
+        call_with_retry(
+            func=lambda: self.client.graph.delete(graph_id=graph_id),
+            operation_name=f"删除图谱({graph_id})"
+        )
 

@@ -19,6 +19,7 @@ from ..config import Config
 from ..utils.logger import get_logger
 from ..utils.llm_client import LLMClient
 from ..utils.zep_paging import fetch_all_nodes, fetch_all_edges
+from ..utils.zep_retry import call_with_retry
 
 logger = get_logger('mirofish.zep_tools')
 
@@ -438,29 +439,6 @@ class ZepToolsService:
             self._llm_client = LLMClient()
         return self._llm_client
     
-    def _call_with_retry(self, func, operation_name: str, max_retries: int = None):
-        """带重试机制的API调用"""
-        max_retries = max_retries or self.MAX_RETRIES
-        last_exception = None
-        delay = self.RETRY_DELAY
-        
-        for attempt in range(max_retries):
-            try:
-                return func()
-            except Exception as e:
-                last_exception = e
-                if attempt < max_retries - 1:
-                    logger.warning(
-                        f"Zep {operation_name} 第 {attempt + 1} 次尝试失败: {str(e)[:100]}, "
-                        f"{delay:.1f}秒后重试..."
-                    )
-                    time.sleep(delay)
-                    delay *= 2
-                else:
-                    logger.error(f"Zep {operation_name} 在 {max_retries} 次尝试后仍失败: {str(e)}")
-        
-        raise last_exception
-    
     def search_graph(
         self, 
         graph_id: str, 
@@ -487,7 +465,7 @@ class ZepToolsService:
         
         # 尝试使用Zep Cloud Search API
         try:
-            search_results = self._call_with_retry(
+            search_results = call_with_retry(
                 func=lambda: self.client.graph.search(
                     graph_id=graph_id,
                     query=query,
@@ -726,7 +704,7 @@ class ZepToolsService:
         logger.info(f"获取节点详情: {node_uuid[:8]}...")
         
         try:
-            node = self._call_with_retry(
+            node = call_with_retry(
                 func=lambda: self.client.graph.node.get(uuid_=node_uuid),
                 operation_name=f"获取节点详情(uuid={node_uuid[:8]}...)"
             )

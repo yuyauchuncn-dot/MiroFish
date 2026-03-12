@@ -86,45 +86,6 @@ class ZepEntityReader:
         
         self.client = Zep(api_key=self.api_key)
     
-    def _call_with_retry(
-        self, 
-        func: Callable[[], T], 
-        operation_name: str,
-        max_retries: int = 3,
-        initial_delay: float = 2.0
-    ) -> T:
-        """
-        带重试机制的Zep API调用
-        
-        Args:
-            func: 要执行的函数（无参数的lambda或callable）
-            operation_name: 操作名称，用于日志
-            max_retries: 最大重试次数（默认3次，即最多尝试3次）
-            initial_delay: 初始延迟秒数
-            
-        Returns:
-            API调用结果
-        """
-        last_exception = None
-        delay = initial_delay
-        
-        for attempt in range(max_retries):
-            try:
-                return func()
-            except Exception as e:
-                last_exception = e
-                if attempt < max_retries - 1:
-                    logger.warning(
-                        f"Zep {operation_name} 第 {attempt + 1} 次尝试失败: {str(e)[:100]}, "
-                        f"{delay:.1f}秒后重试..."
-                    )
-                    time.sleep(delay)
-                    delay *= 2  # 指数退避
-                else:
-                    logger.error(f"Zep {operation_name} 在 {max_retries} 次尝试后仍失败: {str(e)}")
-        
-        raise last_exception
-    
     def get_all_nodes(self, graph_id: str) -> List[Dict[str, Any]]:
         """
         获取图谱的所有节点（分页获取）
@@ -182,21 +143,21 @@ class ZepEntityReader:
     
     def get_node_edges(self, node_uuid: str) -> List[Dict[str, Any]]:
         """
-        获取指定节点的所有相关边（带重试机制）
-        
+        获取指定节点的所有相关边
+
         Args:
             node_uuid: 节点UUID
-            
+
         Returns:
             边列表
         """
         try:
             # 使用重试机制调用Zep API
-            edges = self._call_with_retry(
+            edges = call_with_retry(
                 func=lambda: self.client.graph.node.get_entity_edges(node_uuid=node_uuid),
                 operation_name=f"获取节点边(node={node_uuid[:8]}...)"
             )
-            
+
             edges_data = []
             for edge in edges:
                 edges_data.append({
@@ -348,7 +309,7 @@ class ZepEntityReader:
         """
         try:
             # 使用重试机制获取节点
-            node = self._call_with_retry(
+            node = call_with_retry(
                 func=lambda: self.client.graph.node.get(uuid_=entity_uuid),
                 operation_name=f"获取节点详情(uuid={entity_uuid[:8]}...)"
             )
