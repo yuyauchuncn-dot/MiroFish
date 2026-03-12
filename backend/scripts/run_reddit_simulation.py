@@ -619,6 +619,9 @@ class RedditSimulationRunner:
                 await self.env.step(initial_actions)
                 print(f"  已发布 {len(initial_actions)} 条初始帖子")
         
+        # 获取定时事件
+        scheduled_events = event_config.get("scheduled_events", [])
+        
         # 主模拟循环
         print("\n开始模拟循环...")
         start_time = datetime.now()
@@ -632,13 +635,32 @@ class RedditSimulationRunner:
                 self.env, simulated_hour, round_num
             )
             
-            if not active_agents:
-                continue
+            actions = {}
             
-            actions = {
-                agent: LLMAction()
-                for _, agent in active_agents
-            }
+            # 1. 首先注入本轮的系统/定时事件
+            current_round_events = [e for e in scheduled_events if e.get("round_num") == round_num]
+            if current_round_events:
+                print(f"  [Round {round_num}] 触发定时事件 ({len(current_round_events)}条)...")
+                for event in current_round_events:
+                    agent_id = event.get("poster_agent_id", 0)
+                    content = event.get("content", "")
+                    try:
+                        agent = self.env.agent_graph.get_agent(agent_id)
+                        actions[agent] = ManualAction(
+                            action_type=ActionType.CREATE_POST,
+                            action_args={"content": content}
+                        )
+                    except Exception as e:
+                        print(f"  警告: 无法为Agent {agent_id}触发定时事件: {e}")
+            
+            # 2. 为激活的Agent分配LLM动作
+            if active_agents:
+                for _, agent in active_agents:
+                    if agent not in actions: # 不要覆盖定时事件动作
+                        actions[agent] = LLMAction()
+            
+            if not actions:
+                continue
             
             await self.env.step(actions)
             

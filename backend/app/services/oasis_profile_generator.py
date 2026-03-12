@@ -52,6 +52,11 @@ class OasisAgentProfile:
     profession: Optional[str] = None
     interested_topics: List[str] = field(default_factory=list)
     
+    # 模拟数值锚点 (Quantitative Anchors)
+    cash_flow: int = 0
+    monthly_expenses: int = 0
+    panic_index: int = 0  # 0-100
+    
     # 来源实体信息
     source_entity_uuid: Optional[str] = None
     source_entity_type: Optional[str] = None
@@ -83,6 +88,10 @@ class OasisAgentProfile:
             profile["profession"] = self.profession
         if self.interested_topics:
             profile["interested_topics"] = self.interested_topics
+            
+        profile["cash_flow"] = self.cash_flow
+        profile["monthly_expenses"] = self.monthly_expenses
+        profile["panic_index"] = self.panic_index
         
         return profile
     
@@ -113,6 +122,10 @@ class OasisAgentProfile:
             profile["profession"] = self.profession
         if self.interested_topics:
             profile["interested_topics"] = self.interested_topics
+            
+        profile["cash_flow"] = self.cash_flow
+        profile["monthly_expenses"] = self.monthly_expenses
+        profile["panic_index"] = self.panic_index
         
         return profile
     
@@ -134,6 +147,9 @@ class OasisAgentProfile:
             "country": self.country,
             "profession": self.profession,
             "interested_topics": self.interested_topics,
+            "cash_flow": self.cash_flow,
+            "monthly_expenses": self.monthly_expenses,
+            "panic_index": self.panic_index,
             "source_entity_uuid": self.source_entity_uuid,
             "source_entity_type": self.source_entity_type,
             "created_at": self.created_at,
@@ -269,6 +285,9 @@ class OasisProfileGenerator:
             country=profile_data.get("country"),
             profession=profile_data.get("profession"),
             interested_topics=profile_data.get("interested_topics", []),
+            cash_flow=profile_data.get("cash_flow", 0),
+            monthly_expenses=profile_data.get("monthly_expenses", 0),
+            panic_index=profile_data.get("panic_index", 0),
             source_entity_uuid=entity.uuid,
             source_entity_type=entity_type,
         )
@@ -686,8 +705,9 @@ class OasisProfileGenerator:
 请生成JSON，包含以下字段:
 
 1. bio: 社交媒体简介，200字
-2. persona: 详细人设描述（2000字的纯文本），需包含:
+2. persona: 详细人设描述（2000字的纯文本），必须包含以下全部内容:
    - 基本信息（年龄、职业、教育背景、所在地）
+   - 财务锚点（非常重要！必须在人设中明确写出你的可用现金流/存款是多少，每月固定支出/房贷是多少，以及你当前的恐慌指数0-100是多少，并在后续决策中严格遵守这些财务约束。如果现金流为负，你必须表现出极度恐慌并寻求变现）
    - 人物背景（重要经历、与事件的关联、社会关系）
    - 性格特征（MBTI类型、核心性格、情绪表达方式）
    - 社交媒体行为（发帖频率、内容偏好、互动风格、语言特点）
@@ -700,13 +720,16 @@ class OasisProfileGenerator:
 6. country: 国家（使用中文，如"中国"）
 7. profession: 职业
 8. interested_topics: 感兴趣话题数组
+9. cash_flow: 当前可用现金流/存款（整数，单位为人民币，比如 500000）
+10. monthly_expenses: 每月固定支出/房贷等（整数，单位为人民币，比如 15000）
+11. panic_index: 初始心态恐慌指数（0-100的整数，0代表极度乐观/稳定，100代表极度恐慌/处于断供边缘）
 
 重要:
 - 所有字段值必须是字符串或数字，不要使用换行符
 - persona必须是一段连贯的文字描述
 - 使用中文（除了gender字段必须用英文male/female）
 - 内容要与实体信息保持一致
-- age必须是有效的整数，gender必须是"male"或"female"
+- age, cash_flow, monthly_expenses, panic_index 必须是有效的整数，gender必须是"male"或"female"
 """
 
     def _build_group_persona_prompt(
@@ -735,8 +758,9 @@ class OasisProfileGenerator:
 请生成JSON，包含以下字段:
 
 1. bio: 官方账号简介，200字，专业得体
-2. persona: 详细账号设定描述（2000字的纯文本），需包含:
+2. persona: 详细账号设定描述（2000字的纯文本），必须包含以下全部内容:
    - 机构基本信息（正式名称、机构性质、成立背景、主要职能）
+   - 财务与生存锚点（非常重要！必须明确写出当前机构的可用资金储备、月度运营成本/债务利息，以及面临的生存压力指数0-100。这些数值将直接决定机构在互动中的底气或恐慌程度）
    - 账号定位（账号类型、目标受众、核心功能）
    - 发言风格（语言特点、常用表达、禁忌话题）
    - 发布内容特点（内容类型、发布频率、活跃时间段）
@@ -749,13 +773,17 @@ class OasisProfileGenerator:
 6. country: 国家（使用中文，如"中国"）
 7. profession: 机构职能描述
 8. interested_topics: 关注领域数组
+9. cash_flow: 机构可用资金储备（整数，单位为人民币，比如 100000000）
+10. monthly_expenses: 机构月度运营成本/债务利息（整数，单位为人民币，比如 5000000）
+11. panic_index: 机构面临的生存压力指数（0-100的整数，0代表资金充裕/地位稳固，100代表面临破产/信誉破产边缘）
 
 重要:
 - 所有字段值必须是字符串或数字，不允许null值
 - persona必须是一段连贯的文字描述，不要使用换行符
 - 使用中文（除了gender字段必须用英文"other"）
 - age必须是整数30，gender必须是字符串"other"
-- 机构账号发言要符合其身份定位"""
+- 机构账号发言要符合其身份定位
+- cash_flow, monthly_expenses, panic_index 必须是有效的整数"""
     
     def _generate_profile_rule_based(
         self,
@@ -929,6 +957,9 @@ class OasisProfileGenerator:
                     persona=entity.summary or f"A participant in social discussions.",
                     source_entity_uuid=entity.uuid,
                     source_entity_type=entity_type,
+                    cash_flow=0,
+                    monthly_expenses=0,
+                    panic_index=0
                 )
                 return idx, fallback_profile, str(e)
         
@@ -985,6 +1016,9 @@ class OasisProfileGenerator:
                         persona=entity.summary or "A participant in social discussions.",
                         source_entity_uuid=entity.uuid,
                         source_entity_type=entity_type,
+                        cash_flow=0,
+                        monthly_expenses=0,
+                        panic_index=0
                     )
                     # 实时写入文件（即使是备用人设）
                     save_profiles_realtime()
