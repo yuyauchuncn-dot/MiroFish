@@ -12,6 +12,7 @@ from zep_cloud.client import Zep
 from ..config import Config
 from ..utils.logger import get_logger
 from ..utils.zep_paging import fetch_all_nodes, fetch_all_edges
+from ..utils.zep_retry import call_with_retry
 
 logger = get_logger('mirofish.zep_entity_reader')
 
