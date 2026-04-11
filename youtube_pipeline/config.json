@@ -1,0 +1,22 @@
+{
+  "channels": [
+    {
+      "name": "老.powerful",
+      "handle": "@oldpowerful",
+      "channel_id": "UC8gZZWIWmBuCb_gzC8DUrvw"
+    },
+    {
+      "name": "Henry SlowFIRE",
+      "handle": "@HenrySlowFIRE",
+      "channel_id": "UC9KZAJODBZXwVbJje4SZg2A"
+    }
+  ],
+  "telegram": {
+    "bot_token": "8554449135:AAFm2J59f1XQ6BkOKAavzaPd7mXVmiN5GpY",
+    "chat_id": "-1003713254306"
+  },
+  "download_dir": "${MONO_ROOT}/data/raw/media/youtube_downloads",
+  "check_interval_hours": 24,
+  "whisper_model": "base",
+  "language": "zh"
+}
