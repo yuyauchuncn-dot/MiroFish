@@ -57,7 +57,7 @@ class MonteCarloRunner:
             self.output_dir = output_dir
         else:
             sim_name = self.config.get('simulation_id', 'sim')
-            self.output_dir = f"/Users/dereky/gemini/analysis/real_estate/{sim_name}_mc_{timestamp}_export"
+            self.output_dir = f"{str(Path(__file__).resolve().parent.parent.parent.parent / 'analysis' / 'real_estate')}/{sim_name}_mc_{timestamp}_export"
         
         os.makedirs(self.output_dir, exist_ok=True)
         

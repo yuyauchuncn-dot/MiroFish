@@ -416,11 +416,11 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='测试新闻投喂器')
-    parser.add_argument('--dir', type=str, 
-                       default='/Users/dereky/gemini/youtube_downloads/老厉害',
+    parser.add_argument('--dir', type=str,
+                       default=str(Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'raw' / 'media' / 'youtube_downloads' / '老厉害'),
                        help='字幕文件目录')
     parser.add_argument('--cache', type=str,
-                       default='/Users/dereky/gemini/analysis/real_estate/news_cache.json',
+                       default=str(Path(__file__).resolve().parent.parent.parent.parent / 'analysis' / 'real_estate' / 'news_cache.json'),
                        help='缓存文件路径')
     parser.add_argument('--sample', type=int, default=5,
                        help='显示样本数量')

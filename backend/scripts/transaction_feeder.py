@@ -133,14 +133,14 @@ def generate_broadcasts(csv_path, target_districts=None, output_path=None):
 
 if __name__ == '__main__':
     import sys
-    csv_path = sys.argv[1] if len(sys.argv) > 1 else '/Users/dereky/gemini/real_estate/sz/analysis/xhs_extracted_cleaned.csv'
-    
+    csv_path = sys.argv[1] if len(sys.argv) > 1 else str(Path(__file__).resolve().parent.parent.parent.parent / 'real_estate' / 'sz' / 'analysis' / 'xhs_extracted_cleaned.csv')
+
     # Generate for Longhua district
     print("=== 龍華片區市場廣播 ===\n")
     broadcasts = generate_broadcasts(
         csv_path,
         target_districts=['红山', '龙华中心', '龙华', '上塘', '民治', '深圳北', '观澜', '大浪'],
-        output_path='/Users/dereky/gemini/analysis/real_estate/longhua_broadcasts.json'
+        output_path=str(Path(__file__).resolve().parent.parent.parent.parent / 'analysis' / 'real_estate' / 'longhua_broadcasts.json')
     )
     for b in broadcasts:
         print(b['message'])
