@@ -7,7 +7,7 @@ MONO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 DIR="$MONO_ROOT/data/raw/media/youtube_downloads/老厉害"
 OUT="$MONO_ROOT/data/raw/media/youtube_downloads/transcripts"
-SCRIPT="$MONO_ROOT/MiroFish/youtube_pipeline/transcribe_video.py"
+SCRIPT="$MONO_ROOT/mirofish/youtube_pipeline/transcribe_video.py"
 
 VIDS=(
   "20260303 - 「野村&美银&巴克莱」20260302：大炼科技，通缩持续，GDP目标降至4.5-5%，"两会"政府工作报告及十五五规划全文前瞻，政策支持消费力度有限，财政政策优先，中美元首会晤｜外资研报｜中国经济｜ [71VeKWYleyA].mp4"

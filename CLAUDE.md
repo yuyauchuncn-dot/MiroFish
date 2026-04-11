@@ -17,7 +17,7 @@
 - Tavily API（搜索）
 
 ## 路径约定
-所有路径相对于 mono 仓库根目录。使用 `GEMINI_ROOT` 环境变量或 `Path(__file__).resolve().parent` 链式向上定位。
+所有路径相对于 mono 仓库根目录。使用 `MONO_ROOT` 环境变量或 `Path(__file__).resolve().parent` 链式向上定位。
 
 ## 关键配置文件
 - `youtube_pipeline/config.py` — YouTube 流水线配置（下载目录、报告目录等）
