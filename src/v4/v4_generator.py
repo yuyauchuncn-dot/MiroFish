@@ -19,6 +19,23 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+# ── 加载 monorepo .env（BAILIAN_API_KEY, TAVILY_API_KEY 等）────────
+def _load_env() -> None:
+    """自动加载 monorepo 根目录的 .env 文件"""
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return  # python-dotenv 未安装时静默跳过
+    # 向上找到 monorepo 根目录
+    p = Path(__file__).resolve()
+    for _ in range(8):
+        env_file = p / ".env"
+        if env_file.exists():
+            load_dotenv(env_file, override=False)  # 不覆盖已存在的环境变量
+            return
+        p = p.parent
+
+_load_env()
 logger = logging.getLogger(__name__)
 
 # ── 路径 ─────────────────────────────────────────────────────────

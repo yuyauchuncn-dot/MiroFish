@@ -608,13 +608,17 @@ def generate_v4_report(
     video_id, channel_name, full_name, title, source_type="youtube",
     social_context="", sentiment_context="", tavily_data=None,
     force_topic=None, force_topic_suffix=None,
+    transcript_text=None,  # For article/local_txt: pre-loaded text content
 ):
     """使用 v4 辩论引擎 + 本地 DB 生成报告 — 通过统一注册表调用"""
     logger.info(f"[{video_id}] 开始生成 v4 报告: {title[:50]}...")
     start_time = time.time()
 
     # 读取内容
-    if source_type == "social-media":
+    if transcript_text:
+        # Pre-loaded content (e.g., from monofetchers or local .txt)
+        transcript = transcript_text
+    elif source_type == "social-media":
         transcript = load_social_content(video_id)
     elif source_type == "podcast":
         transcript = load_podcast_content(video_id)
