@@ -11,6 +11,14 @@ MONO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 VENV="$MONO_ROOT/mem0-venv"
 STEP_ENV="/tmp/mirofish_step.env"
 
+# 加载 monorepo .env（API keys: BAILIAN_API_KEY, TAVILY_API_KEY, etc.）
+ENV_FILE="$MONO_ROOT/.env"
+if [ -f "$ENV_FILE" ]; then
+    set -a
+    source "$ENV_FILE"
+    set +a
+fi
+
 # 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
