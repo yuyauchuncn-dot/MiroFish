@@ -46,7 +46,7 @@ def _find_mono_root() -> Path:
 
 _MONO_ROOT = _find_mono_root()
 _EVIDENCE_DIR = _MONO_ROOT / "monodata" / "db"
-_LIVENEWS_DIR = _MONO_ROOT / "monodata" / "livenews"
+_LIVENEWS_DIR = _MONO_ROOT / "monodata" / "db"
 
 
 # ── 结果缓存（LRU, 最多 64 个查询）─────────────────────────
@@ -243,7 +243,7 @@ class ResearchQueries:
 
     @property
     def livenews_db(self) -> Path:
-        return _LIVENEWS_DIR / "news.db"
+        return _LIVENEWS_DIR / "livenews.db"
 
     def _conn(self, db_path: Path) -> sqlite3.Connection:
         return self._pool.get(str(db_path))
@@ -1195,7 +1195,7 @@ class ResearchQueries:
         ]
         return "\n\n".join(s for s in sections if s and not s.startswith("["))
 
-    # ── LiveNews 实时新闻（livenews/data/db/news.db）────────────
+    # ── LiveNews 实时新闻（monodata/db/livenews.db）────────────
 
     def search_livenews(self, query: str, limit: int = 10, days_back: int = 7) -> List[Dict]:
         """LiveNews FTS5 全文搜索

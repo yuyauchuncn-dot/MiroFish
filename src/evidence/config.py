@@ -54,7 +54,7 @@ MACRO_ECONOMIC_DB = DB_DIR / "macro_economic.db"
 ENTITY_GRAPH_DB = DB_DIR / "entity_graph.db"
 
 # Livenews DB
-LIVENEWS_DB = _MONO_ROOT / "monodata" / "livenews" / "news.db"
+LIVENEWS_DB = _MONO_ROOT / "monodata" / "db" / "livenews.db"
 
 # Legacy paths (kept for compatibility, may not exist in monorepo)
 EVIDENCE_DIR = _MONO_ROOT / "data" / "evidence"
