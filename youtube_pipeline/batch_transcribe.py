@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Batch transcribe Henry videos - processes all 18 videos."""
+"""Batch transcribe videos - processes all videos missing transcripts."""
 import sys
 import os
+import shutil
 import subprocess
 from pathlib import Path
 import time
 
-FFMPEG = "/opt/homebrew/bin/ffmpeg"
-BASE_DIR = Path.home() / "gemini/youtube_downloads/Henry 的慢思考"
-OUT_DIR = Path.home() / "gemini/youtube_downloads/transcripts"
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_MONO_ROOT = _SCRIPT_DIR.parent.parent.parent
+FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
+YOUTUBE_DIR = _MONO_ROOT / "data" / "raw" / "media" / "youtube_downloads"
+OUT_DIR = YOUTUBE_DIR / "transcripts"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 VIDEOS = [
@@ -22,12 +25,12 @@ VIDEOS = [
 def find_video(vid):
     """Find video file by ID - exact match on [vid] in filename."""
     result = subprocess.run(
-        ["bash", "-c", f"cd '{BASE_DIR}' && ls 2>/dev/null"],
+        ["bash", "-c", f"cd '{YOUTUBE_DIR}' && ls 2>/dev/null"],
         capture_output=True, text=True
     )
     for line in result.stdout.strip().split('\n'):
         if f"[{vid}]" in line and (line.endswith('.mp4') or line.endswith('.mkv') or line.endswith('.webm')):
-            return BASE_DIR / line
+            return YOUTUBE_DIR / line
     return None
 
 def transcribe_video(video_path, output_path):

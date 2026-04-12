@@ -23,16 +23,16 @@ BAILIAN_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 BAILIAN_MODEL = "qwen3.6-plus"  # 可选：qwen-turbo (更快更便宜), qwen3.6-plus (平衡), qwen3.5-plus (推荐), qwen-max (最高质量)
 
 # ============== Tavily 搜索配置 ==============
-TAVILY_API_KEY = "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"
+TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY", "")
 TAVILY_MAX_RESULTS = 5  # 每份报告中搜索返回的结果条数
 
 # ============== 路径配置（相对路径） ==============
 CHANNELS = ["Henry 的慢思考", "老厉害"]
 YOUTUBE_DIR = str(_monorepo_root / "data" / "raw" / "media" / "youtube_downloads")
-REPORTS_DIR = str(_monorepo_root / "data" / "reports" / "youtube")
+REPORTS_DIR = str(_monorepo_root / "monodata" / "reports" / "youtube")
 CHECKLIST_PATH = str(_script_dir / "checklist.json")
-MIROFISH_SPEC_PATH = str(_monorepo_root / "mirofish_v3_spec.md")  # v3 默认
-MIROFISH_V4_SPEC_PATH = str(_monorepo_root / "src" / "analysis" / "mirofish" / "mirofish_v4_spec.md")
+MIROFISH_SPEC_PATH = str(_monorepo_root / "mirofish" / "youtube_pipeline" / "mirofish_v3_spec.md")  # v3 默认
+MIROFISH_V4_SPEC_PATH = str(_monorepo_root / "mirofish" / "src" / "v4" / "mirofish_v4_spec.md")
 
 # ============== 报告格式 ==============
 REPORT_DATE_FORMAT = "%Y%m%d"  # YYYYMMDD

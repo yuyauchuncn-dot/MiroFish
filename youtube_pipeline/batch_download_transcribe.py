@@ -3,14 +3,16 @@
 Batch download, transcribe, and prepare for MiroFish analysis.
 Usage: python3 batch_download_transcribe.py <channel> [--transcribe] [--mirofish]
 """
-import subprocess, sys, json, os
+import subprocess, sys, json, os, shutil
 from pathlib import Path
 from urllib.request import urlopen, Request
 from xml.etree import ElementTree as ET
 
-WORK_DIR = Path.home() / "gemini" / "youtube_downloads"
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_MONO_ROOT = _SCRIPT_DIR.parent.parent.parent
+WORK_DIR = _MONO_ROOT / "data" / "raw" / "media" / "youtube_downloads"
 TRANSCRIPT_DIR = WORK_DIR / "transcripts"
-FFMPEG = "/opt/homebrew/bin/ffmpeg"
+FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
 YT_DLP = "yt-dlp"
 
 # Channel configs

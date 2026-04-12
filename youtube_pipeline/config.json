@@ -12,7 +12,7 @@
     }
   ],
   "telegram": {
-    "bot_token": "8554449135:AAFm2J59f1XQ6BkOKAavzaPd7mXVmiN5GpY",
+    "bot_token_env": "TELEGRAM_BOT_TOKEN",
     "chat_id": "-1003713254306"
   },
   "download_dir": "${MONO_ROOT}/data/raw/media/youtube_downloads",

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """MiroFish Interactive Bot - Topic-specific agents"""
 import os, sys, requests, json, random
+from pathlib import Path
 from datetime import datetime
 
-TOKEN = "8536830590:AAFEFFHDI5ENeGD92dlHJ8RiEmmcaQDkCm0"
-CHAT_ID = "-1003713254306"
-STATE_FILE = str(Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'mirofish_state.json')
-os.makedirs(str(Path(__file__).resolve().parent.parent.parent.parent / 'data'), exist_ok=True)
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "-1003713254306")
+_MONO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent  # scripts/mirofish → mirofish → monorepo
+STATE_FILE = str(_MONO_ROOT / "data" / "mirofish_state.json")
+os.makedirs(str(_MONO_ROOT / "data"), exist_ok=True)
 
 # Topic-specific agents
 TOPIC_AGENTS = {

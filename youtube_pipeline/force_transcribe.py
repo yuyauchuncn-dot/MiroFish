@@ -2,13 +2,15 @@
 """
 Force transcription of existing video file.
 """
-import sys, os
+import sys, os, shutil
 from pathlib import Path
 
-# Configuration - same as batch script
-WORK_DIR = Path.home() / "gemini" / "youtube_downloads"
+# Configuration — paths relative to monorepo root
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_MONO_ROOT = _SCRIPT_DIR.parent.parent.parent
+WORK_DIR = _MONO_ROOT / "data" / "raw" / "media" / "youtube_downloads"
 TRANSCRIPT_DIR = WORK_DIR / "transcripts"
-FFMPEG = "/opt/homebrew/bin/ffmpeg"
+FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
 
 def extract_audio(video_id, folder):
     """Extract audio from video file."""

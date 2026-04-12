@@ -5,6 +5,7 @@ MiroFish 流水线：第 2 步 - 生成字幕
 输出：更新 /tmp/mirofish_step.env 中的 TRANSCRIPT_PATH
 """
 
+import shutil
 import os
 import sys
 import subprocess
@@ -123,8 +124,9 @@ def transcribe_with_whisper(video_path, output_dir, model_size="base"):
 
     try:
         import subprocess
+        ffmpeg_path = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
         subprocess.run([
-            "/opt/homebrew/bin/ffmpeg", '-i', str(video_path),
+            ffmpeg_path, '-i', str(video_path),
             '-vn', '-acodec', 'pcm_s16le',
             '-ar', '16000', '-ac', '1', '-y', str(wav_path)
         ], capture_output=True, timeout=300, check=True)

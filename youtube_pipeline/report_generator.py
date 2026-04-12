@@ -624,7 +624,8 @@ def generate_v4_report(
 
     # 通过注册表调用 v4 生成器
     try:
-        sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+        _src_path = str(Path(__file__).parent.parent / "src")
+        sys.path.insert(0, _src_path)
         from mirofish.registry import get_generator
         gen = get_generator("v4")
         result = gen.generate(
@@ -640,8 +641,8 @@ def generate_v4_report(
         logger.error(f"[{video_id}] v4 报告生成失败: {e}", exc_info=True)
         return None
     finally:
-        if str(Path(__file__).parent.parent.parent / "src") in sys.path:
-            sys.path.remove(str(Path(__file__).parent.parent.parent / "src"))
+        if _src_path in sys.path:
+            sys.path.remove(_src_path)
 
     if not result:
         logger.error(f"[{video_id}] v4: 返回结果为空")
