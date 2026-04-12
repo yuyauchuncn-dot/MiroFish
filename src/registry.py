@@ -7,7 +7,8 @@
   2. 在 REGISTRY 中注册
 
 使用:
-    from mirofish.registry import get_generator
+    # Add mirofish/src/ to sys.path, then:
+    from registry import get_generator
     gen = get_generator("v4")
     result = gen.generate(transcript="...", title="...", ...)
 """

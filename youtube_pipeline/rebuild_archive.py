@@ -17,11 +17,17 @@ from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
 
-YOUTUBE_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'raw' / 'media' / 'youtube_downloads'")
-ARCHIVE_FILE = YOUTUBE_DIR / "download_archive.txt"
-ARCHIVE_EXTENDED_FILE = YOUTUBE_DIR / "download_archive_extended.json"
-TEMP_ARCHIVE_FILE = YOUTUBE_DIR / "download_archive.txt.tmp"
-IGNORED_DIR = YOUTUBE_DIR / "ignored"
+# Import path configuration from config module
+_script_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(_script_dir))
+from config import YOUTUBE_DIR
+sys.path.pop(0)
+
+_YT = Path(YOUTUBE_DIR)
+ARCHIVE_FILE = _YT / "download_archive.txt"
+ARCHIVE_EXTENDED_FILE = _YT / "download_archive_extended.json"
+TEMP_ARCHIVE_FILE = _YT / "download_archive.txt.tmp"
+IGNORED_DIR = _YT / "ignored"
 
 
 def _signal_handler(signum, frame):
@@ -47,7 +53,7 @@ def extract_video_id_from_filename(filename):
 def guess_channel_from_path(file_path):
     """从文件路径推断频道名（使用第一级子目录）"""
     try:
-        relative = file_path.relative_to(YOUTUBE_DIR)
+        relative = file_path.relative_to(_YT)
         parts = relative.parts
         if len(parts) > 1:
             # 文件在子目录中，返回子目录名
@@ -70,7 +76,7 @@ def rebuild_archive():
     video_mapping = {}
     channel_count = defaultdict(int)
 
-    for mp4_file in YOUTUBE_DIR.rglob("*.mp4"):
+    for mp4_file in _YT.rglob("*.mp4"):
         if not mp4_file.is_file():
             continue
 

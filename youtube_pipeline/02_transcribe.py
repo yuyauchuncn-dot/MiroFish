@@ -6,15 +6,18 @@ MiroFish 流水线：第 2 步 - 生成字幕
 """
 
 import shutil
-import os
 import sys
 import subprocess
 import re
 from pathlib import Path
 
+# Import path configuration from config module
+_script_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(_script_dir))
+from config import YOUTUBE_DIR, TRANSCRIPTS_DIR
+sys.path.pop(0)
+
 STEP_ENV = "/tmp/mirofish_step.env"
-YOUTUBE_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'raw' / 'media' / 'youtube_downloads'")
-TRANSCRIPTS_DIR = YOUTUBE_DIR / "transcripts"
 
 # ASR 错字修正（从 evidence 模块导入）
 def _apply_asr_corrections(text: str) -> str:

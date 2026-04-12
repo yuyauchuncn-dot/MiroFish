@@ -5,14 +5,19 @@ MiroFish 流水线：第 3 步 - 生成 MiroFish 报告
 调用 report_generator.py --test 生成报告
 """
 
-import os
+import re
 import sys
 import subprocess
 from pathlib import Path
 from datetime import datetime
 
+# Import path configuration from config module
+_script_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(_script_dir))
+from config import REPORTS_DIR
+sys.path.pop(0)
+
 STEP_ENV = "/tmp/mirofish_step.env"
-REPORTS_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'reports' / 'youtube'")
 
 
 def load_step_env():

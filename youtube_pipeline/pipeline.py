@@ -10,7 +10,7 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 from config import (
-    ENABLED, YOUTUBE_DIR, REPORTS_DIR, CHECKLIST_PATH,
+    ENABLED, YOUTUBE_DIR, TRANSCRIPTS_DIR, REPORTS_DIR, CHECKLIST_PATH,
     CHANNELS, MIROFISH_SPEC_PATH
 )
 
@@ -51,15 +51,25 @@ def scan_videos_in_channel(channel_name):
         return []
 
     videos = []
-    transcripts_dir = Path(YOUTUBE_DIR) / "transcripts"
+    # 搜索字幕的目录列表
+    transcript_dirs = [
+        Path(YOUTUBE_DIR) / "transcripts",  # 旧位置
+        Path(TRANSCRIPTS_DIR) / channel_name,  # 新位置（频道子目录）
+        Path(TRANSCRIPTS_DIR),  # 新位置（根目录）
+    ]
 
     for mp4_file in sorted(channel_dir.glob("*.mp4")):
         video_id = extract_video_id(mp4_file.name)
         if video_id:
             full_name = mp4_file.stem  # 完整名称包括日期和标题
-            # 字幕文件使用新命名约定: "full_name [video_id].txt"
-            transcript_file = transcripts_dir / f"{full_name} [{video_id}].txt"
-            has_transcript = transcript_file.exists()
+            # 在多个位置查找字幕文件
+            has_transcript = False
+            for transcripts_dir in transcript_dirs:
+                if transcripts_dir.exists():
+                    transcript_file = transcripts_dir / f"{full_name} [{video_id}].txt"
+                    if transcript_file.exists():
+                        has_transcript = True
+                        break
             videos.append({
                 "video_id": video_id,
                 "full_name": full_name,

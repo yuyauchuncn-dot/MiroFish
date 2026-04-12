@@ -8,13 +8,15 @@ Standardize video names across the pipeline:
 
 import json
 import re
+import sys
 from pathlib import Path
 from datetime import datetime
 
-YOUTUBE_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'raw' / 'media' / 'youtube_downloads'")
-CHANNELS = ["Henry 的慢思考", "老厉害"]
-TRANSCRIPTS_DIR = YOUTUBE_DIR / "transcripts"
-REPORTS_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'reports' / 'youtube'")
+# Import path configuration from config module
+_script_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(_script_dir))
+from config import YOUTUBE_DIR, TRANSCRIPTS_DIR, REPORTS_DIR, CHANNELS
+sys.path.pop(0)
 
 def build_video_mapping():
     """Build mapping of video_id -> (full_name, channel, file_path)"""

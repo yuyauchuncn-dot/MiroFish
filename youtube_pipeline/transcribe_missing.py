@@ -23,7 +23,7 @@ except ImportError:
     WHISPER_AVAILABLE = False
 
 from config import (
-    YOUTUBE_DIR, CHECKLIST_PATH, CHANNELS
+    YOUTUBE_DIR, TRANSCRIPTS_DIR, CHECKLIST_PATH, CHANNELS
 )
 
 # 日志配置
@@ -296,11 +296,14 @@ def transcript_exists(video_id, full_name, channel=None):
         possible_vtt = f"{full_name} [{video_id}].vtt"
         possible_srt = f"{full_name} [{video_id}].srt"
 
-    # 搜索目录
+    # 搜索目录（含 monodata/raw/youtube/ 新位置）
     search_dirs = []
     if channel and channel != "Unknown":
         search_dirs.append(Path(YOUTUBE_DIR) / channel)
     search_dirs.append(Path(YOUTUBE_DIR) / "transcripts")
+    if channel and channel != "Unknown":
+        search_dirs.append(Path(TRANSCRIPTS_DIR) / channel)
+    search_dirs.append(Path(TRANSCRIPTS_DIR))
     search_dirs.append(Path(YOUTUBE_DIR))
 
     for search_dir in search_dirs:

@@ -31,7 +31,7 @@ except ImportError:
 from config import (
     ENABLED, BAILIAN_API_KEY, BAILIAN_BASE_URL, BAILIAN_MODEL,
     TAVILY_API_KEY, TAVILY_MAX_RESULTS,
-    YOUTUBE_DIR, REPORTS_DIR, CHECKLIST_PATH, MIROFISH_SPEC_PATH,
+    YOUTUBE_DIR, TRANSCRIPTS_DIR, REPORTS_DIR, CHECKLIST_PATH, MIROFISH_SPEC_PATH,
     REPORT_DATE_FORMAT, REPORT_FILENAME_TEMPLATE
 )
 
@@ -283,12 +283,17 @@ def load_transcript(video_id, full_name, channel=None):
     # 要检查的目录列表
     search_dirs = []
 
-    # 添加频道目录
+    # 添加频道目录（和视频文件同目录）
     if channel and channel != "Unknown":
         search_dirs.append(Path(YOUTUBE_DIR) / channel)
 
-    # 添加 transcripts 目录
+    # 添加 transcripts 目录（旧位置，youtube_downloads/transcripts/）
     search_dirs.append(Path(YOUTUBE_DIR) / "transcripts")
+
+    # 添加 monodata/raw/youtube/ 目录（新位置，含频道子目录）
+    if channel and channel != "Unknown":
+        search_dirs.append(Path(TRANSCRIPTS_DIR) / channel)
+    search_dirs.append(Path(TRANSCRIPTS_DIR))
 
     # 添加根目录
     search_dirs.append(Path(YOUTUBE_DIR))
@@ -626,7 +631,7 @@ def generate_v4_report(
     try:
         _src_path = str(Path(__file__).parent.parent / "src")
         sys.path.insert(0, _src_path)
-        from mirofish.registry import get_generator
+        from registry import get_generator
         gen = get_generator("v4")
         result = gen.generate(
             transcript=transcript,
@@ -991,7 +996,7 @@ def test_single_video(video_id, use_v4=False):
     if video_id not in videos:
         logger.warning(f"视频 ID '{video_id}' 不在 checklist 中，尝试从磁盘扫描...")
         # 磁盘扫描兜底：直接搜索 YOUTUBE_DIR 下的 .mp4 文件
-        youtube_dir = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'raw' / 'media' / 'youtube_downloads'")
+        youtube_dir = Path(YOUTUBE_DIR)
         ignored_dir = youtube_dir / "ignored"
         found_info = None
         for mp4 in youtube_dir.rglob("*.mp4"):

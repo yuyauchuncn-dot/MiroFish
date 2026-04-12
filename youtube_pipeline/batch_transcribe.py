@@ -7,11 +7,14 @@ import subprocess
 from pathlib import Path
 import time
 
-_SCRIPT_DIR = Path(__file__).resolve().parent
-_MONO_ROOT = _SCRIPT_DIR.parent.parent.parent
+# Import path configuration from config module
+_script_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(_script_dir))
+from config import YOUTUBE_DIR, TRANSCRIPTS_DIR
+sys.path.pop(0)
+
 FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
-YOUTUBE_DIR = _MONO_ROOT / "data" / "raw" / "media" / "youtube_downloads"
-OUT_DIR = YOUTUBE_DIR / "transcripts"
+OUT_DIR = Path(TRANSCRIPTS_DIR)
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 VIDEOS = [
@@ -23,14 +26,10 @@ VIDEOS = [
 ]
 
 def find_video(vid):
-    """Find video file by ID - exact match on [vid] in filename."""
-    result = subprocess.run(
-        ["bash", "-c", f"cd '{YOUTUBE_DIR}' && ls 2>/dev/null"],
-        capture_output=True, text=True
-    )
-    for line in result.stdout.strip().split('\n'):
-        if f"[{vid}]" in line and (line.endswith('.mp4') or line.endswith('.mkv') or line.endswith('.webm')):
-            return YOUTUBE_DIR / line
+    """Find video file by ID - recursive search in YOUTUBE_DIR."""
+    for f in YOUTUBE_DIR.rglob(f"*[{vid}]*"):
+        if f.suffix in ['.mp4', '.mkv', '.webm']:
+            return f
     return None
 
 def transcribe_video(video_path, output_path):

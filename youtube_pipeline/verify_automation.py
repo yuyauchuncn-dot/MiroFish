@@ -6,7 +6,7 @@
 import json
 import sys
 from pathlib import Path
-from config import CHECKLIST_PATH, YOUTUBE_DIR, REPORTS_DIR
+from config import CHECKLIST_PATH, YOUTUBE_DIR, TRANSCRIPTS_DIR, REPORTS_DIR
 
 def verify_checklist():
     """验证 checklist 结构"""
@@ -67,7 +67,7 @@ def verify_config():
     from config import (
         ENABLED, BAILIAN_API_KEY, BAILIAN_BASE_URL, BAILIAN_MODEL,
         TAVILY_API_KEY, TAVILY_MAX_RESULTS,
-        CHANNELS, YOUTUBE_DIR, REPORTS_DIR
+        CHANNELS, YOUTUBE_DIR, TRANSCRIPTS_DIR, REPORTS_DIR
     )
 
     print(f"   ENABLED: {ENABLED}")
@@ -107,12 +107,23 @@ def verify_transcript_availability():
                 break
 
         if video_id:
-            transcript_file = Path(YOUTUBE_DIR) / channel / f"{video_id}.txt"
-            if transcript_file.exists():
+            # Search multiple locations for transcript
+            search_paths = [
+                Path(YOUTUBE_DIR) / channel / f"{video_id}.txt",
+                Path(TRANSCRIPTS_DIR) / channel / f"{video_id}.txt",
+                Path(TRANSCRIPTS_DIR) / f"{video_id}.txt",
+            ]
+            transcript_file = None
+            for p in search_paths:
+                if p.exists():
+                    transcript_file = p
+                    break
+
+            if transcript_file and transcript_file.exists():
                 size = transcript_file.stat().st_size
-                print(f"   ✅ 示例字幕: {video_id}.txt ({size} 字节)")
+                print(f"   ✅ 示例字幕: {transcript_file.name} ({size} 字节)")
             else:
-                print(f"   ❌ 字幕文件不存在: {transcript_file}")
+                print(f"   ❌ 字幕文件不存在 (searched {len(search_paths)} locations)")
                 return False
 
     print("   ✅ 字幕检查完成")

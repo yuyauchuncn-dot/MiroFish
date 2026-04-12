@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 # Load .env from monorepo root
 _script_dir = Path(__file__).resolve().parent
-_monorepo_root = _script_dir.parent.parent.parent  # youtube_pipeline -> MiroFish -> monorepo root
+_monorepo_root = _script_dir.parent.parent  # youtube_pipeline -> mirofish -> monorepo root
 _env_path = _monorepo_root / ".env"
 if _env_path.exists():
     load_dotenv(_env_path)
@@ -28,8 +28,9 @@ TAVILY_MAX_RESULTS = 5  # 每份报告中搜索返回的结果条数
 
 # ============== 路径配置（相对路径） ==============
 CHANNELS = ["Henry 的慢思考", "老厉害"]
-YOUTUBE_DIR = str(_monorepo_root / "data" / "raw" / "media" / "youtube_downloads")
-REPORTS_DIR = str(_monorepo_root / "monodata" / "reports" / "youtube")
+YOUTUBE_DIR = str(_monorepo_root / "data" / "raw" / "media" / "youtube_downloads")  # 视频文件
+TRANSCRIPTS_DIR = str(_monorepo_root / "monodata" / "raw" / "youtube")               # 字幕/转录源文件 (txt/vtt/srt)
+REPORTS_DIR = str(_monorepo_root / "monodata" / "reports" / "youtube")               # 生成的报告
 CHECKLIST_PATH = str(_script_dir / "checklist.json")
 MIROFISH_SPEC_PATH = str(_monorepo_root / "mirofish" / "youtube_pipeline" / "mirofish_v3_spec.md")  # v3 默认
 MIROFISH_V4_SPEC_PATH = str(_monorepo_root / "mirofish" / "src" / "v4" / "mirofish_v4_spec.md")

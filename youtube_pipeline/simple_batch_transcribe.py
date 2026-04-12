@@ -2,13 +2,19 @@
 """Simple batch transcribe for lao lihai videos."""
 import os
 import sys
+import shutil
 import subprocess
 from pathlib import Path
 
-# Constants
-FFMPEG = "/opt/homebrew/bin/ffmpeg"
-VIDEO_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'raw' / 'media' / 'youtube_downloads'/老厉害")
-OUTPUT_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'raw' / 'media' / 'youtube_downloads'/transcripts")
+# Import path configuration from config module
+_script_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(_script_dir))
+from config import YOUTUBE_DIR
+sys.path.pop(0)
+
+FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
+VIDEO_DIR = Path(YOUTUBE_DIR) / "老厉害"
+OUTPUT_DIR = Path(YOUTUBE_DIR) / "transcripts"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Video IDs to transcribe

@@ -17,9 +17,14 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
-YOUTUBE_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'raw' / 'media' / 'youtube_downloads'")
-TRANSCRIPTS_DIR = YOUTUBE_DIR / "transcripts"
-ARCHIVE_EXTENDED_FILE = YOUTUBE_DIR / "download_archive_extended.json"
+# Import path configuration from config module
+_script_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(_script_dir))
+from config import YOUTUBE_DIR
+sys.path.pop(0)
+
+TRANSCRIPTS_DIR = Path(YOUTUBE_DIR) / "transcripts"
+ARCHIVE_EXTENDED_FILE = Path(YOUTUBE_DIR) / "download_archive_extended.json"
 
 
 def _signal_handler(signum, frame):

@@ -16,12 +16,20 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
-YOUTUBE_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'raw' / 'media' / 'youtube_downloads'")
-# 支持多级目录：包括根目录和子频道目录
-TRANSCRIPTS_DIR = YOUTUBE_DIR / "transcripts"
-IGNORED_DIR = YOUTUBE_DIR / "ignored"
+# Import path configuration from config module
+_script_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(_script_dir))
+from config import YOUTUBE_DIR, TRANSCRIPTS_DIR, REPORTS_DIR
+sys.path.pop(0)
+
+# Convert to Path objects
+_YT = Path(YOUTUBE_DIR)
+_TS = Path(TRANSCRIPTS_DIR)
+_RS = Path(REPORTS_DIR)
+
+# Additional local paths
+IGNORED_DIR = _YT / "ignored"
 CHECKLIST_FILE = Path(__file__).parent / "checklist.json"
-REPORTS_DIR = Path("Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'reports' / 'youtube'")
 
 
 def _signal_handler(signum, frame):
@@ -58,12 +66,13 @@ def fix_transcript_names():
     print("🔧 Fixing transcript file names...")
     print("="*70)
 
-    if not TRANSCRIPTS_DIR.exists():
+    if not _TS.exists():
         print("Transcripts directory does not exist")
         return 0
 
     renamed_count = 0
-    for f in TRANSCRIPTS_DIR.glob('*.txt'):
+    # Recursively search all transcript files (may be in channel subdirectories)
+    for f in _TS.rglob('*.txt'):
         name = f.name
         # Match pattern: ... [VIDEO_ID] [VIDEO_ID].txt (duplicated)
         match = re.search(r'^(.*)\[([^\]]+)\] \[\2\]\.txt$', name)
@@ -74,7 +83,7 @@ def fix_transcript_names():
             # base_name might end with space or not, we want exactly one space
             base_name = base_name.rstrip()
             new_name = f"{base_name} [{video_id}].txt"
-            new_path = TRANSCRIPTS_DIR / new_name
+            new_path = f.parent / new_name
 
             # Check if target file already exists
             if new_path.exists():
@@ -111,7 +120,7 @@ def build_video_mapping():
     mapping = {}
 
     # Recursively search all .mp4 files under YOUTUBE_DIR
-    for file_path in YOUTUBE_DIR.rglob("*.mp4"):
+    for file_path in _YT.rglob("*.mp4"):
         if not file_path.is_file():
             continue
 
@@ -129,7 +138,7 @@ def build_video_mapping():
             date = date_match.group(1) if date_match else datetime.now().strftime("%Y%m%d")
 
             # Guess channel from directory structure
-            channel = guess_channel_from_path(file_path, YOUTUBE_DIR)
+            channel = guess_channel_from_path(file_path, _YT)
 
             mapping[video_id] = {
                 'full_name': filename,
@@ -157,6 +166,13 @@ def check_transcript_exists(video_id, full_name, channel=None):
 def find_transcript(video_id, full_name, channel=None):
     """Find transcript file and return (exists, path) tuple.
 
+    Search order:
+    1. Channel directory under YOUTUBE_DIR (same as video file)
+    2. Central transcripts directory under YOUTUBE_DIR (legacy)
+    3. monodata/raw/youtube/ channel subdirectory (new)
+    4. monodata/raw/youtube/ root
+    5. YOUTUBE_DIR root
+
     Returns:
         tuple: (bool, str or None) - (exists, absolute_path)
     """
@@ -170,49 +186,50 @@ def find_transcript(video_id, full_name, channel=None):
         vtt_name = f"{full_name} [{video_id}].vtt"
         srt_name = f"{full_name} [{video_id}].srt"
 
-    # Check in channel directory first (where new transcripts are generated)
+    def _check_formats(search_dir):
+        """Check for .txt, .vtt, .srt in a directory."""
+        for name in [transcript_name, vtt_name, srt_name]:
+            f = search_dir / name
+            if f.exists():
+                return True, str(f)
+        return False, None
+
+    # 1. Channel directory under YOUTUBE_DIR
     if channel and channel != "Unknown":
-        channel_transcript = YOUTUBE_DIR / channel / transcript_name
-        if channel_transcript.exists():
-            return True, str(channel_transcript)
-        channel_vtt = YOUTUBE_DIR / channel / vtt_name
-        if channel_vtt.exists():
-            return True, str(channel_vtt)
-        channel_srt = YOUTUBE_DIR / channel / srt_name
-        if channel_srt.exists():
-            return True, str(channel_srt)
+        found, path = _check_formats(_YT / channel)
+        if found:
+            return True, path
 
-    # Check in central transcripts directory
-    central_transcript = TRANSCRIPTS_DIR / transcript_name
-    if central_transcript.exists():
-        return True, str(central_transcript)
-    central_vtt = TRANSCRIPTS_DIR / vtt_name
-    if central_vtt.exists():
-        return True, str(central_vtt)
-    central_srt = TRANSCRIPTS_DIR / srt_name
-    if central_srt.exists():
-        return True, str(central_srt)
+    # 2. Central transcripts directory under YOUTUBE_DIR (legacy)
+    found, path = _check_formats(_YT / "transcripts")
+    if found:
+        return True, path
 
-    # Check in YOUTUBE_DIR root
-    root_transcript = YOUTUBE_DIR / transcript_name
-    if root_transcript.exists():
-        return True, str(root_transcript)
-    root_vtt = YOUTUBE_DIR / vtt_name
-    if root_vtt.exists():
-        return True, str(root_vtt)
-    root_srt = YOUTUBE_DIR / srt_name
-    if root_srt.exists():
-        return True, str(root_srt)
+    # 3. monodata/raw/youtube/ channel subdirectory (new location)
+    if channel and channel != "Unknown":
+        found, path = _check_formats(_TS / channel)
+        if found:
+            return True, path
+
+    # 4. monodata/raw/youtube/ root
+    found, path = _check_formats(_TS)
+    if found:
+        return True, path
+
+    # 5. YOUTUBE_DIR root
+    found, path = _check_formats(_YT)
+    if found:
+        return True, path
 
     return False, None
 
 
 def check_report_exists(video_id, full_name, channel):
     """Check if report file already exists for this video"""
-    if not REPORTS_DIR.exists():
+    if not _RS.exists():
         return False, None
 
-    channel_report_dir = REPORTS_DIR / channel
+    channel_report_dir = _RS / channel
     if not channel_report_dir.exists():
         return False, None
 
