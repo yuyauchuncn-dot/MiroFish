@@ -441,7 +441,9 @@ def generate_v4_report(
     # 6. 保存报告文件
     date_str = datetime.now().strftime("%Y%m%d")
     safe_title = _sanitize_filename(title)
-    suffix = force_topic_suffix or ""
+    # Use topic category as suffix for report filename (e.g., _macro_strategy)
+    topic_suffix = f"_{topic_category.value}" if topic_category is not None and hasattr(topic_category, 'value') else ""
+    suffix = force_topic_suffix or topic_suffix
     report_filename = f"{date_str}_{safe_title}_v4_MiroFish{suffix}.md"
     report_dir = _MONO_ROOT / "monodata" / "reports" / "youtube" / channel
     report_dir.mkdir(parents=True, exist_ok=True)
