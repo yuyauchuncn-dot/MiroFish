@@ -444,7 +444,7 @@ def generate_v4_report(
     # Use topic category as suffix for report filename (e.g., _macro_strategy)
     topic_suffix = f"_{topic_category.value}" if topic_category is not None and hasattr(topic_category, 'value') else ""
     suffix = force_topic_suffix or topic_suffix
-    report_filename = f"{date_str}_{safe_title}_v4_MiroFish{suffix}.md"
+    report_filename = f"{date_str}_{video_id}_{safe_title}_v4_MiroFish{suffix}.md"
     report_dir = _MONO_ROOT / "monodata" / "reports" / "youtube" / channel
     report_dir.mkdir(parents=True, exist_ok=True)
     report_path = report_dir / report_filename
@@ -832,8 +832,8 @@ def _sanitize_filename(name: str) -> str:
     name = name.replace("/", " - ").replace("\\", " - ")
     for char in [':', '*', '?', '"', '<', '>', '|']:
         name = name.replace(char, " ")
-    # 截取前 80 字符避免文件名过长
-    name = name[:80].strip()
+    # 截取前 40 字符避免文件名过长（中文字符较宽）
+    name = name[:40].strip()
     return name
 
 

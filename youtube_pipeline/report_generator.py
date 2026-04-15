@@ -830,14 +830,11 @@ def generate_report(video_id, channel_name, full_name, title, source_type="youtu
         report_dir = Path(REPORTS_DIR) / channel_name
     report_dir.mkdir(parents=True, exist_ok=True)
 
-    # 新报告命名: {date}_{full_name}_MiroFish.md
-    # 注意: full_name 已包含 [VIDEO_ID]，无需重复
+    # 报告命名: {date}_{video_id}_{short_title}_MiroFish.md
     date_str = datetime.now().strftime("%Y%m%d")
-    report_filename = f"{date_str}_{full_name}_MiroFish.md"
-    # 清理文件名中的非法字符
-    logger.info(f"[{video_id}] 原始文件名: {report_filename}")
-    report_filename = sanitize_filename(report_filename)
-    logger.info(f"[{video_id}] 清理后文件名: {report_filename}")
+    short_title = sanitize_filename(title)[:40].strip()
+    report_filename = f"{date_str}_{video_id}_{short_title}_MiroFish.md"
+    logger.info(f"[{video_id}] 报告文件名: {report_filename}")
     report_path = report_dir / report_filename
 
     with open(report_path, "w", encoding="utf-8") as f:
