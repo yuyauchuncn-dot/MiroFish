@@ -1585,7 +1585,7 @@ def _resolve_ambiguous_term(text: str, category: Optional[TopicCategory] = None)
                                     "software_release", "software_deploy", "ci_pipeline",
                                     "docker_container", "software_mirror"],
         TopicCategory.REAL_ESTATE: ["human_agent"],  # 房产经纪人
-        TopicCategory.MACRO_STRATEGY: ["supply_chain"],
+        TopicCategory.MACRO_STRATEGY: ["supply_chain", "knowledge_domain"],
         TopicCategory.COMMODITIES: ["supply_chain", "oil_pipeline", "seaport"],
         TopicCategory.WAR_CONFLICT: ["military_deploy"],
     }
@@ -1603,16 +1603,22 @@ def _resolve_ambiguous_term(text: str, category: Optional[TopicCategory] = None)
         # 计算每个含义的信号匹配得分
         best_meaning = None
         best_score = 0
+        second_best_score = 0
         for meaning_name, meaning_info in rule["meanings"].items():
             score = sum(1 for sig in meaning_info["signals"] if sig.lower() in text_lower)
             # 分类 boost：如果含义在 boost 列表中，翻倍得分
             if meaning_name in boost_meanings:
                 score *= 2
             if score > best_score:
+                second_best_score = best_score
                 best_score = score
                 best_meaning = meaning_name
+            elif score > second_best_score:
+                second_best_score = score
 
-        if best_meaning and best_score > 0:
+        # 置信度阈值：得分差距不足时不注入消歧约束
+        MIN_GAP = 2
+        if best_meaning and best_score > 0 and (best_score - second_best_score) >= MIN_GAP:
             label = rule["meanings"][best_meaning]["label"]
             # 同时列出其他含义，告知代理不要混淆
             other_labels = [
@@ -1623,14 +1629,14 @@ def _resolve_ambiguous_term(text: str, category: Optional[TopicCategory] = None)
             if other_labels:
                 other_text = "、".join(other_labels)
                 constraint = (
-                    f"语义消歧：文中的「{term}」指的是 {label}，"
-                    f"不是「{other_text}」。请严格围绕 {label} 展开分析，"
-                    f"不要将分析引入到其他含义的领域。"
+                    f"语义消歧：文中的「{term}」倾向于指 {label}，"
+                    f"而非「{other_text}」。分析时可适当侧重该含义，"
+                    f"但也需留意上下文是否涉及其他含义。"
                 )
             else:
                 constraint = (
-                    f"语义消歧：文中的「{term}」指的是 {label}。"
-                    f"请严格围绕该含义展开分析。"
+                    f"语义消歧：文中的「{term}」倾向于指 {label}，"
+                    f"分析时可适当侧重该含义。"
                 )
             constraints.append(constraint)
 
