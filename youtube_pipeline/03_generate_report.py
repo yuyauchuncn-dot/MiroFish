@@ -8,6 +8,7 @@ MiroFish 流水线：第 3 步 - 生成 MiroFish 报告
 import re
 import sys
 import subprocess
+import tempfile
 from pathlib import Path
 from datetime import datetime
 
@@ -74,6 +75,10 @@ def main():
     if '--v4' in sys.argv:
         use_v4 = True
 
+    # Check if we have pre-fetched transcript text from monofetchers
+    env = load_step_env()
+    transcript_text = env.get('TRANSCRIPT_TEXT', '')
+
     # 命令行参数优先（可能是 video_id 或 YouTube URL）
     if len(sys.argv) > 1:
         arg = sys.argv[1]
@@ -132,7 +137,19 @@ def main():
     cmd = ["python3", str(report_generator), "--test", video_id]
     if use_v4:
         cmd.append("--v4")
-    result = subprocess.run(cmd, cwd=str(script_dir))
+
+    # Pass transcript_text via temp file (avoids shell quoting for large strings)
+    transcript_file = None
+    if transcript_text:
+        transcript_file = Path(tempfile.mktemp(suffix="_transcript.txt"))
+        transcript_file.write_text(transcript_text, encoding="utf-8")
+        cmd.extend(["--transcript-text-file", str(transcript_file)])
+
+    try:
+        result = subprocess.run(cmd, cwd=str(script_dir))
+    finally:
+        if transcript_file and transcript_file.exists():
+            transcript_file.unlink()
 
     if result.returncode != 0:
         print(f"\n❌ 报告生成失败")

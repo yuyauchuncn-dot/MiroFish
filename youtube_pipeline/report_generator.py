@@ -690,7 +690,7 @@ def generate_v4_report(
     return report_path if report_path else None
 
 
-def generate_report(video_id, channel_name, full_name, title, source_type="youtube", use_v4=False):
+def generate_report(video_id, channel_name, full_name, title, source_type="youtube", use_v4=False, transcript_text=None):
     """生成单个视频的 MiroFish 报告"""
 
     if use_v4:
@@ -699,12 +699,13 @@ def generate_report(video_id, channel_name, full_name, title, source_type="youtu
         store_tavily_to_db(tavily_data, video_id, title)
         social_context = ""
         if source_type == "youtube":
-            transcript_tmp = load_transcript(video_id, full_name, channel_name) or ""
+            transcript_tmp = transcript_text or load_transcript(video_id, full_name, channel_name) or ""
             social_context = find_social_context_for_text(transcript_tmp)
 
         sentiment_context = ""
         try:
             sentiment_mod = _load_sentiment_module("keyword_sentiment_analyzer")
+            transcript_tmp = transcript_text or load_transcript(video_id, full_name, channel_name) or ""
             if sentiment_mod and transcript_tmp:
                 analyzer = sentiment_mod.KeywordSentimentAnalyzer(use_llm=True)
                 analysis = analyzer.analyze_report_content(
@@ -717,13 +718,16 @@ def generate_report(video_id, channel_name, full_name, title, source_type="youtu
         return generate_v4_report(
             video_id, channel_name, full_name, title, source_type,
             social_context, sentiment_context, tavily_data,
+            transcript_text=transcript_text,
         )
 
     logger.info(f"[{video_id}] 开始生成报告: {title[:50]}...")
     start_time = time.time()
 
-    # 读取内容（YouTube 字幕 或 社交媒体 cleaned text）
-    if source_type == "social-media":
+    # 读取内容（优先使用预加载的 transcript_text，否则从文件系统加载）
+    if transcript_text:
+        transcript = transcript_text
+    elif source_type == "social-media":
         transcript = load_social_content(video_id)
         if not transcript:
             logger.error(f"[{video_id}] 社交媒体 cleaned text 不存在")
@@ -983,7 +987,7 @@ def process_pending_videos(max_parallel=MAX_PARALLEL_JOBS, use_v4=False):
     logger.info(f"{'='*70}\n")
 
 
-def test_single_video(video_id, use_v4=False):
+def test_single_video(video_id, use_v4=False, transcript_text=None):
     """测试单个视频的报告生成"""
 
     logger.info(f"\n{'='*70}")
@@ -1046,12 +1050,16 @@ def test_single_video(video_id, use_v4=False):
     logger.info(f"   频道: {channel}")
     logger.info(f"   有字幕: {has_transcript}")
 
-    if not has_transcript:
+    # 如果有预加载的 transcript_text（来自 monofetchers），跳过字幕检查
+    if not has_transcript and not transcript_text:
         logger.error(f"该视频没有字幕，无法生成报告")
         return False
 
+    if transcript_text:
+        logger.info(f"   使用预加载的 transcript: {len(transcript_text)} chars")
+
     # 生成报告
-    report_path = generate_report(video_id, channel, full_name, title, use_v4=use_v4)
+    report_path = generate_report(video_id, channel, full_name, title, use_v4=use_v4, transcript_text=transcript_text)
 
     if report_path:
         logger.info(f"✅ 报告生成成功")
@@ -1187,6 +1195,11 @@ def main():
         action="store_true",
         help="使用 MiroFish v4.0 框架 (多代理辩论 + 预测引擎)"
     )
+    parser.add_argument(
+        "--transcript-text-file",
+        type=str,
+        help="预加载的 transcript 文件路径（来自 monofetchers）"
+    )
 
     args = parser.parse_args()
 
@@ -1221,7 +1234,14 @@ def main():
             logger.error("--source-type social-media 需要 --account <handle> 或 --process-all")
             sys.exit(1)
     elif args.test:
-        success = test_single_video(args.test, use_v4=args.v4)
+        # Read pre-loaded transcript if provided
+        transcript_text = None
+        if args.transcript_text_file:
+            try:
+                transcript_text = Path(args.transcript_text_file).read_text(encoding="utf-8")
+            except Exception as e:
+                logger.warning(f"Failed to read transcript file: {e}")
+        success = test_single_video(args.test, use_v4=args.v4, transcript_text=transcript_text)
         sys.exit(0 if success else 1)
     elif args.process_all:
         process_pending_videos(max_parallel=args.parallel, use_v4=args.v4)

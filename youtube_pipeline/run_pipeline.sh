@@ -59,6 +59,15 @@ fi
 
 INPUT="$1"
 
+# Detect --v4 flag early (for step 0)
+USE_V4="false"
+for arg in "$@"; do
+    if [ "$arg" = "--v4" ]; then
+        USE_V4="true"
+        break
+    fi
+done
+
 print_header "MiroFish 单视频完整流水线"
 
 # 激活虚拟环境
@@ -70,24 +79,45 @@ fi
 print_success "激活虚拟环境：$VENV"
 source "$VENV/bin/activate"
 
-# === 第 1 步：下载 ===
-print_header "第 1 步：下载视频 / 检查本地文件"
+# === 第 0 步：统一内容获取（monofetchers）===
+print_header "第 0 步：统一内容获取（monofetchers）"
 
-if bash "$SCRIPT_DIR/01_download.sh" "$INPUT"; then
-    print_success "下载步骤完成"
+FALLBACK="false"
+if python3 "$SCRIPT_DIR/00_fetch.py" "$INPUT" ${USE_V4:+--v4} 2>&1; then
+    # Check if monofetchers handled it or requested fallback
+    if grep -q "FALLBACK=true" "$STEP_ENV" 2>/dev/null; then
+        echo ""
+        print_warning "monofetchers could not handle this input — using legacy pipeline"
+        FALLBACK="true"
+    else
+        print_success "monofetchers 获取完成（跳过下载 + 转录步骤）"
+    fi
 else
-    print_error "下载步骤失败"
-    exit 1
+    echo ""
+    print_warning "00_fetch.py 执行失败 — 使用传统流水线"
+    FALLBACK="true"
 fi
 
-# === 第 2 步：生成字幕 ===
-print_header "第 2 步：生成字幕"
+# === 第 1 步：下载视频 / 检查本地文件（传统，仅 fallback）===
+if [ "$FALLBACK" = "true" ]; then
+    print_header "第 1 步：下载视频 / 检查本地文件（传统）"
 
-if python3 "$SCRIPT_DIR/02_transcribe.py"; then
-    print_success "字幕生成步骤完成"
-else
-    print_error "字幕生成步骤失败"
-    exit 1
+    if bash "$SCRIPT_DIR/01_download.sh" "$INPUT"; then
+        print_success "下载步骤完成"
+    else
+        print_error "下载步骤失败"
+        exit 1
+    fi
+
+    # === 第 2 步：生成字幕（传统，仅 fallback）===
+    print_header "第 2 步：生成字幕（传统）"
+
+    if python3 "$SCRIPT_DIR/02_transcribe.py"; then
+        print_success "字幕生成步骤完成"
+    else
+        print_error "字幕生成步骤失败"
+        exit 1
+    fi
 fi
 
 # === 第 2.5 步：更新清单（确保新视频进入 checklist，供报告生成器使用）===
