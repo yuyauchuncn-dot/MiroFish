@@ -7,7 +7,7 @@ set -e
 
 # 定位 monorepo 根目录（youtube_pipeline -> MiroFish -> monorepo）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MONO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+MONO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 YOUTUBE_DIR="$MONO_ROOT/data/raw/media/youtube_downloads"
 ARCHIVE_FILE="$YOUTUBE_DIR/download_archive.txt"

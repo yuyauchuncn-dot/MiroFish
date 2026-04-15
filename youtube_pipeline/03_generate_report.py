@@ -49,7 +49,7 @@ def find_existing_report(channel, video_id, use_v4=False):
         video_id: 视频 ID
         use_v4: True = 查找 _v4_MiroFish.md, False = 查找 _MiroFish.md（非 v4）
     """
-    channel_dir = REPORTS_DIR / channel
+    channel_dir = Path(REPORTS_DIR) / channel
     if not channel_dir.exists():
         return None
 

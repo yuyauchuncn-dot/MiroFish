@@ -7,7 +7,7 @@ set -e
 
 # 配置
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MONO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+MONO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 VENV="$MONO_ROOT/mem0-venv"
 STEP_ENV="/tmp/mirofish_step.env"
 

@@ -225,7 +225,11 @@ def find_transcript(video_id, full_name, channel=None):
 
 
 def check_report_exists(video_id, full_name, channel):
-    """Check if report file already exists for this video"""
+    """Check if report file already exists for this video.
+
+    Matches filenames in the format: {date}_{video_id}_{short_title}_MiroFish.md
+    or {date}_{video_id}_{short_title}_v4_MiroFish.md
+    """
     if not _RS.exists():
         return False, None
 
@@ -233,11 +237,9 @@ def check_report_exists(video_id, full_name, channel):
     if not channel_report_dir.exists():
         return False, None
 
-    # Search for report files: *_MiroFish.md and check if video_id is in the filename
-    # The filename format is: {date}_{title}_[{video_id}]_MiroFish.md
-    # We use glob to find all MiroFish files, then filter by video_id
-    for report_file in channel_report_dir.glob("*_MiroFish.md"):
-        if f"[{video_id}]" in report_file.name:
+    for report_file in channel_report_dir.glob("*_MiroFish*.md"):
+        # Match by _{video_id}_ in filename (works with both old and new formats)
+        if f"_{video_id}_" in report_file.name or f"[{video_id}]" in report_file.name:
             return True, str(report_file)
 
     return False, None
