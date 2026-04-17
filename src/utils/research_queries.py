@@ -22,6 +22,7 @@
 import json
 import logging
 import sqlite3
+import sys
 import time
 from collections import OrderedDict
 from dataclasses import dataclass, field
@@ -47,6 +48,11 @@ def _find_mono_root() -> Path:
 _MONO_ROOT = _find_mono_root()
 _EVIDENCE_DIR = _MONO_ROOT / "monodata" / "db"
 _LIVENEWS_DIR = _MONO_ROOT / "monodata" / "db"
+
+# Use env_resolver for DB paths (respects MONODATA_ENV for staging)
+if str(_MONO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_MONO_ROOT))
+from monodata.lib.env_resolver import db_path as _rq_db_path
 
 
 # ── 结果缓存（LRU, 最多 64 个查询）─────────────────────────
@@ -203,47 +209,47 @@ class ResearchQueries:
 
     @property
     def news_db(self) -> Path:
-        return self.evidence_dir / "news.db"
+        return _rq_db_path("news.db")
 
     @property
     def research_reports_db(self) -> Path:
-        return self.evidence_dir / "research_reports.db"
+        return _rq_db_path("research_reports.db")
 
     @property
     def sec_filings_db(self) -> Path:
-        return self.evidence_dir / "sec_filings.db"
+        return _rq_db_path("sec_filings.db")
 
     @property
     def important_persons_db(self) -> Path:
-        return self.evidence_dir / "important_persons.db"
+        return _rq_db_path("important_persons.db")
 
     @property
     def market_data_db(self) -> Path:
-        return self.evidence_dir / "market_data.db"
+        return _rq_db_path("market_data.db")
 
     @property
     def company_fundamentals_db(self) -> Path:
-        return self.evidence_dir / "company_fundamentals.db"
+        return _rq_db_path("company_fundamentals.db")
 
     @property
     def thirteen_f_db(self) -> Path:
-        return self.evidence_dir / "thirteen_f.db"
+        return _rq_db_path("thirteen_f.db")
 
     @property
     def evidence_sources_db(self) -> Path:
-        return self.evidence_dir / "evidence_sources.db"
+        return _rq_db_path("evidence_sources.db")
 
     @property
     def macro_economic_db(self) -> Path:
-        return self.evidence_dir / "macro_economic.db"
+        return _rq_db_path("macro_economic.db")
 
     @property
     def market_intelligence_db(self) -> Path:
-        return self.evidence_dir / "market_intelligence.db"
+        return _rq_db_path("market_intelligence.db")
 
     @property
     def livenews_db(self) -> Path:
-        return _LIVENEWS_DIR / "livenews.db"
+        return _rq_db_path("livenews.db")
 
     def _conn(self, db_path: Path) -> sqlite3.Connection:
         return self._pool.get(str(db_path))

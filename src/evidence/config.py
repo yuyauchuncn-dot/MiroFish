@@ -6,6 +6,7 @@ Evidence Collector — 终极信息源采集系统
 """
 
 import os
+import sys
 from pathlib import Path
 
 
@@ -30,31 +31,36 @@ def _find_mono_root() -> Path:
 
 _MONO_ROOT = _find_mono_root()
 
-# Evidence DBs live under monodata/db/
-DB_DIR = _MONO_ROOT / "monodata" / "db"
-NEWS_DB = DB_DIR / "news.db"
-TWEETS_DB = DB_DIR / "tweets.db"
-PODCASTS_DB = DB_DIR / "podcasts.db"
-VIDEOS_DB = DB_DIR / "videos.db"
-RESEARCH_DB = DB_DIR / "research.db"
-FILINGS_DB = DB_DIR / "filings.db"
-CALENDARS_DB = DB_DIR / "calendars.db"
-MARKET_DATA_DB = DB_DIR / "market_data.db"
-SOURCES_DB = DB_DIR / "evidence_sources.db"
+# Use env_resolver for all DB paths (respects MONODATA_ENV for staging)
+if str(_MONO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_MONO_ROOT))
+from monodata.lib.env_resolver import db_path as _env_db_path
+
+DB_DIR = _MONO_ROOT / "monodata" / "db"  # legacy compat
+PROJECT_ROOT = _MONO_ROOT  # legacy compat for entityrelationshipweb
+NEWS_DB = _env_db_path("news.db")
+TWEETS_DB = _env_db_path("tweets.db")
+PODCASTS_DB = _env_db_path("podcasts.db")
+VIDEOS_DB = _env_db_path("videos.db")
+RESEARCH_DB = _env_db_path("research.db")
+FILINGS_DB = _env_db_path("filings.db")
+CALENDARS_DB = _env_db_path("calendars.db")
+MARKET_DATA_DB = _env_db_path("market_data.db")
+SOURCES_DB = _env_db_path("evidence_sources.db")
 
 # Independent evidence DBs
-SEC_FILINGS_DB = DB_DIR / "sec_filings.db"
-IMPORTANT_PERSONS_DB = DB_DIR / "important_persons.db"
-RESEARCH_REPORTS_DB = DB_DIR / "research_reports.db"
-CHINA_COMPANIES_DB = DB_DIR / "china_companies.db"
-COMPANY_FUNDAMENTALS_DB = DB_DIR / "company_fundamentals.db"
-THIRTEEN_F_DB = DB_DIR / "thirteen_f.db"
-MARKET_INTELLIGENCE_DB = DB_DIR / "market_intelligence.db"
-MACRO_ECONOMIC_DB = DB_DIR / "macro_economic.db"
-ENTITY_GRAPH_DB = DB_DIR / "entity_graph.db"
+SEC_FILINGS_DB = _env_db_path("sec_filings.db")
+IMPORTANT_PERSONS_DB = _env_db_path("important_persons.db")
+RESEARCH_REPORTS_DB = _env_db_path("research_reports.db")
+CHINA_COMPANIES_DB = _env_db_path("china_companies.db")
+COMPANY_FUNDAMENTALS_DB = _env_db_path("company_fundamentals.db")
+THIRTEEN_F_DB = _env_db_path("thirteen_f.db")
+MARKET_INTELLIGENCE_DB = _env_db_path("market_intelligence.db")
+MACRO_ECONOMIC_DB = _env_db_path("macro_economic.db")
+ENTITY_GRAPH_DB = _env_db_path("entity_graph.db")
 
 # Livenews DB
-LIVENEWS_DB = _MONO_ROOT / "monodata" / "db" / "livenews.db"
+LIVENEWS_DB = _env_db_path("livenews.db")
 
 # Legacy paths (kept for compatibility, may not exist in monorepo)
 EVIDENCE_DIR = _MONO_ROOT / "data" / "evidence"
