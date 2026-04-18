@@ -621,6 +621,34 @@ def _entity_graph_ingest(report_path: str):
         logger.warning(f"Entity graph ingest failed for {Path(report_path).name}: {stderr}")
 
 
+# ── Market intelligence ingestion hook ─────────────────────────────
+
+_MONODATA_INGEST_SCRIPT = Path(__file__).resolve().parent.parent.parent / "monodata" / "scripts" / "ingest_mirofish_reports.py"
+
+
+def _market_intelligence_ingest(report_path: str):
+    """Call monodata ingest script to store report analysis + causal edges in DB.
+
+    Runs as subprocess to avoid import conflicts.
+    Fails silently — ingestion errors never break report generation.
+    """
+    if not _MONODATA_INGEST_SCRIPT.exists():
+        logger.debug(f"Market intelligence ingest script not found: {_MONODATA_INGEST_SCRIPT}")
+        return
+
+    result = subprocess.run(
+        [sys.executable, str(_MONODATA_INGEST_SCRIPT), "--single", report_path],
+        capture_output=True, text=True, timeout=60,
+    )
+    if result.returncode == 0:
+        output = result.stdout.strip()
+        if output:
+            logger.info(f"Market intelligence ingest: {output}")
+    else:
+        stderr = result.stderr.strip().split("\n")[-1] if result.stderr else "unknown"
+        logger.warning(f"Market intelligence ingest failed for {Path(report_path).name}: {stderr}")
+
+
 def sanitize_filename(filename: str) -> str:
     """清理文件名中的非法字符（特别是处理中文特殊字符如 /）"""
     # 替换 / 为 - (常见的非法文件名字符)
@@ -863,6 +891,12 @@ def generate_report(video_id, channel_name, full_name, title, source_type="youtu
         _entity_graph_ingest(str(report_path))
     except Exception as e:
         logger.warning(f"[{video_id}] 报告入库失败（不影响报告生成）: {e}")
+
+    # === Stage 5: 入库到 market_intelligence.db + 因果边 ===
+    try:
+        _market_intelligence_ingest(str(report_path))
+    except Exception as e:
+        logger.warning(f"[{video_id}] 市场情报入库失败（不影响报告生成）: {e}")
 
     return str(report_path)
 
