@@ -1,17 +1,17 @@
-# Youtube Channel Downloader
+# YouTube 频道下载器
 
-This script efficiently downloads all videos and their Chinese/English transcripts from the "老厉害" YouTube channel.
+本脚本可高效下载 YouTube 频道中的所有视频及其**中英文字幕**。
 
-It is designed to be **intelligent and economical**:
-- It **will not re-download** any videos you already have in your `youtube_downloads` directory.
-- It keeps track of downloaded videos in an archive file (`youtube_downloads/download_archive.txt`), so you can run it multiple times, and it will only fetch new content.
+设计**智能且节省流量**：
+- **不会重复下载** `youtube_downloads` 目录中已有的视频
+- 通过归档文件（`youtube_downloads/download_archive.txt`）跟踪已下载视频，可重复运行，仅获取新内容
 
-## How to Use
+## 使用方法
 
-I have already created the script and made it executable for you. To start downloading all missing videos and transcripts, simply run the following command in your terminal:
+脚本已创建并赋予执行权限。下载所有缺失视频和字幕：
 
 ```bash
 ./scripts/download_youtube_channel.sh
 ```
 
-The script will handle the rest, placing new videos and their `.vtt` transcript files into the `./youtube_downloads/老厉害/` directory, named neatly with the upload date.
+脚本会自动将新视频和 `.vtt` 字幕文件放入 `./youtube_downloads/老厉害/` 目录，按上传日期命名。
