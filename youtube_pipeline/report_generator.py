@@ -15,6 +15,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 import time
+import subprocess
 
 try:
     from openai import OpenAI

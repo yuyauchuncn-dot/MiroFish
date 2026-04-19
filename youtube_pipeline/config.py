@@ -32,7 +32,7 @@ YOUTUBE_DIR = str(_monorepo_root / "data" / "raw" / "media" / "youtube_downloads
 TRANSCRIPTS_DIR = str(_monorepo_root / "monodata" / "raw" / "youtube")               # 字幕/转录源文件 (txt/vtt/srt)
 REPORTS_DIR = str(_monorepo_root / "monodata" / "reports" / "youtube")               # 生成的报告
 CHECKLIST_PATH = str(_script_dir / "checklist.json")
-MIROFISH_SPEC_PATH = str(_monorepo_root / "mirofish" / "youtube_pipeline" / "mirofish_v3_spec.md")  # v3 默认
+MIROFISH_SPEC_PATH = str(_monorepo_root / "mirofish" / "src" / "v3" / "mirofish_v3_spec.md")  # v3 默认
 MIROFISH_V4_SPEC_PATH = str(_monorepo_root / "mirofish" / "src" / "v4" / "mirofish_v4_spec.md")
 
 # ============== 报告格式 ==============

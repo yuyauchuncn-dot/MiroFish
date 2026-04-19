@@ -1,0 +1,1 @@
+/Users/dereky/Documents/monorepo/personas/scripts/config.py
