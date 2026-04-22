@@ -3,6 +3,16 @@
 ## 职责
 报告生成引擎 + YouTube 分析流水线。Flask 后端 + Vue.js 前端，支持多代理模拟、知识图谱生成、投资分析报告。
 
+## KDB 知识覆盖
+
+本模块的流水线、报告模板已在 KDB 中注册。修改代码前先查 KDB：
+
+```bash
+python3 monokdb/kdb search "mirofish" --expand
+```
+
+> 📋 完整指令：[monokdb/docs/kdb-first-prompt.md](monokdb/docs/kdb-first-prompt.md)
+
 ## 目录结构
 - `backend/` — Flask API + Vue 前端（原始 MiroFish 代码）
 - `frontend/` — Vue.js SPA
