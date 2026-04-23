@@ -8,7 +8,7 @@ from pathlib import Path
 # Configuration — paths relative to monorepo root
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _MONO_ROOT = _SCRIPT_DIR.parent.parent.parent
-WORK_DIR = _MONO_ROOT / "data" / "raw" / "media" / "youtube_downloads"
+WORK_DIR = _MONO_ROOT / "monodata" / "data" / "raw" / "media" / "youtube_downloads"
 TRANSCRIPT_DIR = WORK_DIR / "transcripts"
 FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
 

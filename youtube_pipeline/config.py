@@ -26,9 +26,9 @@ BAILIAN_MODEL = "qwen3.6-plus"  # 可选：qwen-turbo (更快更便宜), qwen3.6
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY", "")
 TAVILY_MAX_RESULTS = 5  # 每份报告中搜索返回的结果条数
 
-# ============== 路径配置（相对路径） ==============
+# ============== 路径配置（monodata 子模块内） ==============
 CHANNELS = ["Henry 的慢思考", "老厉害"]
-YOUTUBE_DIR = str(_monorepo_root / "data" / "raw" / "media" / "youtube_downloads")  # 视频文件
+YOUTUBE_DIR = str(_monorepo_root / "monodata" / "data" / "raw" / "media" / "youtube_downloads")  # 视频+转录文件
 TRANSCRIPTS_DIR = str(_monorepo_root / "monodata" / "raw" / "youtube")               # 字幕/转录源文件 (txt/vtt/srt)
 REPORTS_DIR = str(_monorepo_root / "monodata" / "reports" / "youtube")               # 生成的报告
 CHECKLIST_PATH = str(_script_dir / "checklist.json")
