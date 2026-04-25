@@ -34,6 +34,7 @@ _MONO_ROOT = _find_mono_root()
 # Use env_resolver for all DB paths (respects MONODATA_ENV for staging)
 if str(_MONO_ROOT) not in sys.path:
     sys.path.insert(0, str(_MONO_ROOT))
+import lib.env_loader  # 确保 .env 已加载（FRED_API_KEY 等）
 from monodata.lib.env_resolver import db_path as _env_db_path
 
 DB_DIR = _MONO_ROOT / "monodata" / "db"  # legacy compat
@@ -70,8 +71,8 @@ RAW_TWITTER_DIR = _MONO_ROOT / "data" / "raw" / "social-media" / "twitter"
 RAW_RSS_DIR = _MONO_ROOT / "data" / "raw" / "social-media" / "rss"
 RAW_XIAOYUZHOU_DIR = _MONO_ROOT / "data" / "raw" / "social-media" / "xiaoyuzhoufm"
 
-# FRED API key — should move to .env
-FRED_API_KEY = os.environ.get("FRED_API_KEY", "f36c1046c4022404c7e1234c2f1b64a5")
+# FRED API key（从 monorepo .env 加载）
+FRED_API_KEY = os.environ.get("FRED_API_KEY", "")
 
 # Cookie files
 TWITTER_COOKIES = EVIDENCE_RAW_DIR / "twitter_cookies.txt"
