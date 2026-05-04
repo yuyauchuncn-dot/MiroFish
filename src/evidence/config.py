@@ -37,8 +37,7 @@ if str(_MONO_ROOT) not in sys.path:
 import lib.env_loader  # 确保 .env 已加载（FRED_API_KEY 等）
 from monodata.lib.env_resolver import db_path as _env_db_path
 
-DB_DIR = _MONO_ROOT / "monodata" / "db"  # legacy compat
-PROJECT_ROOT = _MONO_ROOT  # legacy compat for entityrelationshipweb
+PROJECT_ROOT = _MONO_ROOT
 NEWS_DB = _env_db_path("news.db")
 TWEETS_DB = _env_db_path("tweets.db")
 PODCASTS_DB = _env_db_path("podcasts.db")

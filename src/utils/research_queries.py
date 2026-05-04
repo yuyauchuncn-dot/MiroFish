@@ -46,13 +46,15 @@ def _find_mono_root() -> Path:
     return Path(__file__).resolve().parent.parent.parent.parent
 
 _MONO_ROOT = _find_mono_root()
-_EVIDENCE_DIR = _MONO_ROOT / "monodata" / "db"
-_LIVENEWS_DIR = _MONO_ROOT / "monodata" / "db"
 
 # Use env_resolver for DB paths (respects MONODATA_ENV for staging)
 if str(_MONO_ROOT) not in sys.path:
     sys.path.insert(0, str(_MONO_ROOT))
 from monodata.lib.env_resolver import db_path as _rq_db_path
+
+# 默认 evidence_dir 使用正确的 DB 根目录
+_EVIDENCE_DIR = _rq_db_path("")
+_LIVENEWS_DIR = _rq_db_path("")
 
 
 # ── 结果缓存（LRU, 最多 64 个查询）─────────────────────────
