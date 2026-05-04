@@ -29,6 +29,12 @@ python3 monokdb/kdb search "mirofish" --expand
 ## 路径约定
 所有路径相对于 mono 仓库根目录。使用 `MONO_ROOT` 环境变量或 `Path(__file__).resolve().parent` 链式向上定位。
 
+## 运行流水线
+
+```bash
+cd mirofish/youtube_pipeline && bash run_pipeline.sh 'https://www.youtube.com/watch?v=VIDEO_ID'
+```
+
 ## 关键配置文件
 - `youtube_pipeline/config.py` — YouTube 流水线配置（下载目录、报告目录等）
 - `youtube_pipeline/config.json` — 下载配置
